@@ -1,0 +1,120 @@
+<form class="form-horizontal">
+    <script cam-script type="text/form-script">
+      camForm.on('escalation', function(evt) {
+        document.getElementById('main').style.display='none'
+        document.getElementById('escalation-content').style.display='inline'
+      });
+
+      camForm.on('error', function(evt) {
+        document.getElementById('main').style.display='none'
+        document.getElementById('error-content').style.display='inline'
+      });
+
+      function resetView() {
+        document.getElementById('main').style.display='inline'
+        document.getElementById('escalation-content').style.display='none'
+        document.getElementById('error-content').style.display='none'
+      }
+
+      document.getElementById('resetEscalationView').addEventListener('click', resetView);
+    </script>
+
+  <div id="main">
+    <div class="row">
+      <div class="col-md-12">
+        <table id="conversation" class="table table-striped">
+          <thead>
+          <tr>
+            <th>Task Updates:</th>
+          </tr>
+          </thead>
+          <tbody id="updates">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <div class="col-xs-2">
+          <label class="checkbox control-label">
+            <input id="optimize" type="checkbox" checked>
+          </label>
+        </div>
+        <label class="control-label col-xs-5" style="text-align: left;" for="optimize">
+          Camunda Optimize 2.7.0-alpha2
+        </label>
+      </div>
+
+      <div class="form-group">
+        <div class="col-xs-2">
+          <label class="checkbox control-label">
+            <input id="modeler" type="checkbox" checked>
+          </label>
+        </div>
+        <label class="control-label col-xs-5" style="text-align: left;" for="modeler">
+          Camunda Modeler 3.5
+        </label>
+      </div>
+
+      <div class="form-group">
+        <div class="col-xs-2">
+          <label class="checkbox control-label">
+            <input id="runtime" type="checkbox">
+          </label>
+        </div>
+        <label class="control-label col-xs-5" style="text-align: left;" for="runtime">
+          Camunda BPM Platform 7.12.0
+        </label>
+      </div>
+
+      <button id="escalation" cam-escalation-code="esc-712" class="btn btn-default">Ask a Question</button>
+      <button id="error" cam-error-code="err-712" class="btn btn-primary">Abort Presentation</button>
+    </div>
+  </div><!-- end main -->
+
+  <div id="escalation-content" style="display: none;">
+    <h2>Question is raised&nbsp;<button id="resetEscalationView" class="btn btn-default">Ok</button></h2>
+    <img src="/img/detective.webp" style="max-width: 100%; max-height: 50vh;" />
+  </div>
+
+  <div id="error-content" style="display: none;">
+      <h2>Error was reported</h2>
+      <img style="max-width: 100%; max-height: 50vh;" src="/img/problem.jpg" />
+    </div>
+
+  <script cam-script type="text/form-script">
+    var stompClient = null;
+    var taskid = camForm.taskId;
+
+    function connect() {
+        var socket = new SockJS('/websocket');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            //setConnected(true);
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/' + taskid, function (update) {
+                showUpdate(JSON.parse(update.body));
+            });
+
+            $scope.$on('$destroy', function() {
+              if (stompClient !== null) {
+                stompClient.disconnect();
+              }
+              console.log("Disconnected");
+          });
+        });
+    }
+
+    function showUpdate(message) {
+        var msg = (message.taskEvent === "update")?
+            "Task was updated by " + message.updatingUser
+            : "Timer assigned task to user " + message.updatingUser;
+        $("#updates").append("<tr><td>" + msg + "</td></tr>");
+    }
+
+    if(!stompClient)
+      connect();
+
+  </script>
+</form>

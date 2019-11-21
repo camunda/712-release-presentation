@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.5.0">
+  <bpmn:process id="release-presentation" name="release-presentation" isExecutable="true">
+    <bpmn:startEvent id="StartEvent" name="Release Built">
+      <bpmn:outgoing>SequenceFlow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent" name="Release Completed">
+      <bpmn:incoming>SequenceFlow_1comdkw</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow1" sourceRef="StartEvent" targetRef="HoldReleaseWebinar" />
+    <bpmn:sequenceFlow id="SequenceFlow_18o7zqy" sourceRef="HoldReleaseWebinar" targetRef="UploadRecordingTask" />
+    <bpmn:userTask id="HoldReleaseWebinar" name="Hold Release Webinar" camunda:formKey="embedded:app:/forms/task-form.html">
+      <bpmn:documentation>Make sure to give a demo that is easy to understand.</bpmn:documentation>
+      <bpmn:extensionElements>
+        <camunda:taskListener delegateExpression="${publishtask}" event="update" />
+        <camunda:taskListener delegateExpression="${forceassign}" event="timeout" id="force-assign">
+          <bpmn:timerEventDefinition id="TimerEventDefinition_1ckov3a">
+            <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT10S</bpmn:timeDuration>
+          </bpmn:timerEventDefinition>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow1</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_18o7zqy</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="IntermediateThrowEvent_1gz24it" name="Question Asked" cancelActivity="false" attachedToRef="HoldReleaseWebinar">
+      <bpmn:outgoing>SequenceFlow_1po084z</bpmn:outgoing>
+      <bpmn:escalationEventDefinition escalationRef="Escalation_04udj1u" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1po084z" sourceRef="IntermediateThrowEvent_1gz24it" targetRef="Task_0wnbd2l" />
+    <bpmn:userTask id="Task_0wnbd2l" name="Answer Question">
+      <bpmn:incoming>SequenceFlow_1po084z</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1nk067n</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="EndEvent_0ea2311" name="Question Answered">
+      <bpmn:incoming>SequenceFlow_1nk067n</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1nk067n" sourceRef="Task_0wnbd2l" targetRef="EndEvent_0ea2311" />
+    <bpmn:boundaryEvent id="IntermediateThrowEvent_0e40due" name="Fatal Error" attachedToRef="HoldReleaseWebinar">
+      <bpmn:documentation>Webinar broadcast is interrupted.</bpmn:documentation>
+      <bpmn:outgoing>SequenceFlow_05eui82</bpmn:outgoing>
+      <bpmn:errorEventDefinition errorRef="Error_089g1ly" />
+    </bpmn:boundaryEvent>
+    <bpmn:userTask id="Task_0mals44" name="Have Drinks">
+      <bpmn:documentation>Ask everyone for their preferred beverage.</bpmn:documentation>
+      <bpmn:incoming>SequenceFlow_0p3j2fi</bpmn:incoming>
+      <bpmn:incoming>SequenceFlow_05eui82</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1comdkw</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0p3j2fi" sourceRef="UploadRecordingTask" targetRef="Task_0mals44" />
+    <bpmn:serviceTask id="UploadRecordingTask" name="Upload Recording" camunda:class="org.camunda.bpm.example.release_presentation.UploadRecordingDelegate">
+      <bpmn:incoming>SequenceFlow_18o7zqy</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0p3j2fi</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1comdkw" sourceRef="Task_0mals44" targetRef="EndEvent" />
+    <bpmn:sequenceFlow id="SequenceFlow_05eui82" sourceRef="IntermediateThrowEvent_0e40due" targetRef="Task_0mals44" />
+  </bpmn:process>
+  <bpmn:escalation id="Escalation_04udj1u" name="Help" escalationCode="esc-712" />
+  <bpmn:error id="Error_089g1ly" name="default Error" errorCode="err-712" camunda:errorMessage="Presentation Aborted" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="release-presentation">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent">
+        <dc:Bounds x="172" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="157" y="203" width="66" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0fkea3f_di" bpmnElement="EndEvent">
+        <dc:Bounds x="722" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="713" y="203" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_08va5r8_di" bpmnElement="SequenceFlow1">
+        <di:waypoint x="208" y="180" />
+        <di:waypoint x="267" y="180" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="228" y="95" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_18o7zqy_di" bpmnElement="SequenceFlow_18o7zqy">
+        <di:waypoint x="367" y="180" />
+        <di:waypoint x="420" y="180" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="496.5" y="99" width="0" height="12" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_1yrn0hr_di" bpmnElement="HoldReleaseWebinar">
+        <dc:Bounds x="267" y="140" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_1eo7d6w_di" bpmnElement="IntermediateThrowEvent_1gz24it">
+        <dc:Bounds x="282" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="211" y="243" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1po084z_di" bpmnElement="SequenceFlow_1po084z">
+        <di:waypoint x="300" y="238" />
+        <di:waypoint x="300" y="300" />
+        <di:waypoint x="420" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_1qbecll_di" bpmnElement="Task_0wnbd2l">
+        <dc:Bounds x="420" y="260" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0ea2311_di" bpmnElement="EndEvent_0ea2311">
+        <dc:Bounds x="722" y="282" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="716" y="325" width="48" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1nk067n_di" bpmnElement="SequenceFlow_1nk067n">
+        <di:waypoint x="520" y="300" />
+        <di:waypoint x="722" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_1s59bpq_di" bpmnElement="IntermediateThrowEvent_0e40due">
+        <dc:Bounds x="282" y="122" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="233" y="113" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UserTask_0nlo6em_di" bpmnElement="Task_0mals44">
+        <dc:Bounds x="570" y="140" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0p3j2fi_di" bpmnElement="SequenceFlow_0p3j2fi">
+        <di:waypoint x="520" y="180" />
+        <di:waypoint x="570" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0d9ippf_di" bpmnElement="UploadRecordingTask">
+        <dc:Bounds x="420" y="140" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1comdkw_di" bpmnElement="SequenceFlow_1comdkw">
+        <di:waypoint x="670" y="180" />
+        <di:waypoint x="722" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_05eui82_di" bpmnElement="SequenceFlow_05eui82">
+        <di:waypoint x="300" y="122" />
+        <di:waypoint x="300" y="80" />
+        <di:waypoint x="620" y="80" />
+        <di:waypoint x="620" y="140" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
